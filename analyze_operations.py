@@ -7,6 +7,8 @@ to help operations teams understand their performance and identify improvement a
 
 import pandas as pd
 from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 # ==========================================
 # STEP 1: LOAD THE DATA
@@ -168,6 +170,85 @@ def export_results(df_kpi, output_filename='operations_kpi_results.csv'):
 
 
 # ==========================================
+# STEP 5: CREATE VISUALIZATIONS
+# ==========================================
+
+def create_visualizations(df_kpi, output_filename='kpi_trends.png'):
+    """
+    Create trend line visualizations for all KPIs.
+    
+    Args:
+        df_kpi (pd.DataFrame): Data with calculated KPIs
+        output_filename (str): Name of output image file
+    """
+    print(f"\n📊 Creating KPI trend visualizations...")
+    
+    # Set up the plot style
+    plt.style.use('seaborn-v0_8-darkgrid')
+    
+    # Create a figure with 4 subplots (2x2 grid)
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig.suptitle('Operations KPI Trends', fontsize=16, fontweight='bold')
+    
+    # Plot 1: Error Rate Trend
+    axes[0, 0].plot(df_kpi['Date'], df_kpi['Error_Rate_%'], 
+                    marker='o', linewidth=2, markersize=4, color='#e74c3c')
+    axes[0, 0].axhline(y=df_kpi['Error_Rate_%'].mean(), 
+                       color='red', linestyle='--', linewidth=1, alpha=0.7, label='Average')
+    axes[0, 0].set_title('Error Rate Trend', fontsize=12, fontweight='bold')
+    axes[0, 0].set_ylabel('Error Rate (%)', fontsize=10)
+    axes[0, 0].legend()
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    # Plot 2: Productivity Trend
+    axes[0, 1].plot(df_kpi['Date'], df_kpi['Productivity_Tasks_Per_Hour'], 
+                    marker='o', linewidth=2, markersize=4, color='#3498db')
+    axes[0, 1].axhline(y=df_kpi['Productivity_Tasks_Per_Hour'].mean(), 
+                       color='blue', linestyle='--', linewidth=1, alpha=0.7, label='Average')
+    axes[0, 1].set_title('Productivity Trend', fontsize=12, fontweight='bold')
+    axes[0, 1].set_ylabel('Tasks per Hour', fontsize=10)
+    axes[0, 1].legend()
+    axes[0, 1].grid(True, alpha=0.3)
+    
+    # Plot 3: Average Time per Task Trend
+    axes[1, 0].plot(df_kpi['Date'], df_kpi['Avg_Time_Per_Task_Minutes'], 
+                    marker='o', linewidth=2, markersize=4, color='#2ecc71')
+    axes[1, 0].axhline(y=df_kpi['Avg_Time_Per_Task_Minutes'].mean(), 
+                       color='green', linestyle='--', linewidth=1, alpha=0.7, label='Average')
+    axes[1, 0].set_title('Avg Time per Task Trend', fontsize=12, fontweight='bold')
+    axes[1, 0].set_ylabel('Minutes per Task', fontsize=10)
+    axes[1, 0].set_xlabel('Date', fontsize=10)
+    axes[1, 0].legend()
+    axes[1, 0].grid(True, alpha=0.3)
+    
+    # Plot 4: Rework Ratio Trend
+    axes[1, 1].plot(df_kpi['Date'], df_kpi['Rework_Ratio_%'], 
+                    marker='o', linewidth=2, markersize=4, color='#f39c12')
+    axes[1, 1].axhline(y=df_kpi['Rework_Ratio_%'].mean(), 
+                       color='orange', linestyle='--', linewidth=1, alpha=0.7, label='Average')
+    axes[1, 1].set_title('Rework Ratio Trend', fontsize=12, fontweight='bold')
+    axes[1, 1].set_ylabel('Rework Ratio (%)', fontsize=10)
+    axes[1, 1].set_xlabel('Date', fontsize=10)
+    axes[1, 1].legend()
+    axes[1, 1].grid(True, alpha=0.3)
+    
+    # Format x-axis dates for all subplots
+    for ax in axes.flat:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
+        ax.tick_params(axis='x', rotation=45)
+    
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+    
+    # Save the figure
+    plt.savefig(output_filename, dpi=300, bbox_inches='tight')
+    print(f"✅ Visualization saved as '{output_filename}'")
+    
+    # Close the plot to free memory
+    plt.close()
+
+
+# ==========================================
 # MAIN EXECUTION
 # ==========================================
 
@@ -190,7 +271,12 @@ def main():
         # Step 4: Export results
         export_results(df_kpi, 'operations_kpi_results.csv')
         
-        print("\n✨ Analysis complete! Check 'operations_kpi_results.csv' for detailed results.\n")
+        # Step 5: Create visualizations
+        create_visualizations(df_kpi, 'kpi_trends.png')
+        
+        print("\n✨ Analysis complete!")
+        print("   📄 Detailed results: 'operations_kpi_results.csv'")
+        print("   📊 Visual trends: 'kpi_trends.png'\n")
         
     except FileNotFoundError:
         print("❌ Error: 'operations_data.csv' not found. Please ensure the file exists.")
