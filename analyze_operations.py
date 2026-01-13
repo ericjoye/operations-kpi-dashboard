@@ -1,0 +1,203 @@
+"""
+Operations KPI Dashboard - Analytics Script
+============================================
+This script analyzes operations data and calculates key performance indicators (KPIs)
+to help operations teams understand their performance and identify improvement areas.
+"""
+
+import pandas as pd
+from datetime import datetime
+
+# ==========================================
+# STEP 1: LOAD THE DATA
+# ==========================================
+
+def load_data(filename='operations_data.csv'):
+    """
+    Load operations data from CSV file.
+    
+    Args:
+        filename (str): Path to the CSV file
+    
+    Returns:
+        pd.DataFrame: Loaded data
+    """
+    print("📊 Loading operations data...")
+    
+    # Read the CSV file into a pandas DataFrame
+    df = pd.read_csv(filename)
+    
+    # Convert Date column to datetime format for easier manipulation
+    df['Date'] = pd.to_datetime(df['Date'])
+    
+    print(f"✅ Loaded {len(df)} records from {df['Date'].min().date()} to {df['Date'].max().date()}")
+    return df
+
+
+# ==========================================
+# STEP 2: CALCULATE KPIs
+# ==========================================
+
+def calculate_kpis(df):
+    """
+    Calculate key performance indicators for operations data.
+    
+    KPIs calculated:
+    - Error Rate: Percentage of tasks that had errors
+    - Productivity: Tasks completed per hour worked
+    - Average Time per Task: How long each task takes on average
+    - Rework Ratio: Percentage of tasks that required rework
+    
+    Args:
+        df (pd.DataFrame): Operations data
+    
+    Returns:
+        pd.DataFrame: Data with KPI columns added
+    """
+    print("\n🔧 Calculating KPIs...")
+    
+    # Create a copy to avoid modifying original data
+    df_kpi = df.copy()
+    
+    # 1. ERROR RATE: (Errors Found / Tasks Completed) * 100
+    # This tells us what percentage of our tasks had issues
+    df_kpi['Error_Rate_%'] = (df_kpi['Errors_Found'] / df_kpi['Tasks_Completed'] * 100).round(2)
+    
+    # 2. PRODUCTIVITY: Tasks Completed / Time Spent
+    # This shows how many tasks we complete per hour
+    df_kpi['Productivity_Tasks_Per_Hour'] = (df_kpi['Tasks_Completed'] / df_kpi['Time_Spent_Hours']).round(2)
+    
+    # 3. AVERAGE TIME PER TASK: Time Spent / Tasks Completed
+    # This indicates how long each task takes on average (in minutes)
+    df_kpi['Avg_Time_Per_Task_Minutes'] = ((df_kpi['Time_Spent_Hours'] / df_kpi['Tasks_Completed']) * 60).round(2)
+    
+    # 4. REWORK RATIO: (Rework Count / Tasks Completed) * 100
+    # This shows what percentage of tasks needed to be redone
+    df_kpi['Rework_Ratio_%'] = (df_kpi['Rework_Count'] / df_kpi['Tasks_Completed'] * 100).round(2)
+    
+    print("✅ KPIs calculated successfully")
+    return df_kpi
+
+
+# ==========================================
+# STEP 3: GENERATE SUMMARY REPORT
+# ==========================================
+
+def generate_summary(df_kpi):
+    """
+    Generate an executive summary of operations performance.
+    
+    Args:
+        df_kpi (pd.DataFrame): Data with calculated KPIs
+    """
+    print("\n" + "="*60)
+    print("📈 OPERATIONS PERFORMANCE SUMMARY")
+    print("="*60)
+    
+    # Calculate overall statistics
+    total_tasks = df_kpi['Tasks_Completed'].sum()
+    total_errors = df_kpi['Errors_Found'].sum()
+    total_hours = df_kpi['Time_Spent_Hours'].sum()
+    total_rework = df_kpi['Rework_Count'].sum()
+    
+    # Calculate average KPIs
+    avg_error_rate = df_kpi['Error_Rate_%'].mean()
+    avg_productivity = df_kpi['Productivity_Tasks_Per_Hour'].mean()
+    avg_time_per_task = df_kpi['Avg_Time_Per_Task_Minutes'].mean()
+    avg_rework_ratio = df_kpi['Rework_Ratio_%'].mean()
+    
+    # Display key metrics
+    print(f"\n📅 Analysis Period: {df_kpi['Date'].min().date()} to {df_kpi['Date'].max().date()}")
+    print(f"📊 Total Working Days: {len(df_kpi)}")
+    
+    print(f"\n🎯 OVERALL PERFORMANCE:")
+    print(f"   • Total Tasks Completed: {total_tasks:,}")
+    print(f"   • Total Hours Worked: {total_hours:,.1f}")
+    print(f"   • Total Errors Found: {total_errors}")
+    print(f"   • Total Rework Items: {total_rework}")
+    
+    print(f"\n📊 AVERAGE KPIs:")
+    print(f"   • Error Rate: {avg_error_rate:.2f}%")
+    print(f"   • Productivity: {avg_productivity:.2f} tasks/hour")
+    print(f"   • Avg Time per Task: {avg_time_per_task:.2f} minutes")
+    print(f"   • Rework Ratio: {avg_rework_ratio:.2f}%")
+    
+    # Performance insights
+    print(f"\n💡 KEY INSIGHTS:")
+    
+    # Check error rate
+    if avg_error_rate > 10:
+        print(f"   ⚠️  High error rate detected ({avg_error_rate:.1f}%). Consider quality improvements.")
+    else:
+        print(f"   ✅ Error rate is within acceptable range ({avg_error_rate:.1f}%).")
+    
+    # Check productivity
+    if avg_productivity >= 6:
+        print(f"   ✅ Strong productivity ({avg_productivity:.2f} tasks/hour).")
+    else:
+        print(f"   ⚠️  Productivity could be improved ({avg_productivity:.2f} tasks/hour).")
+    
+    # Check rework ratio
+    if avg_rework_ratio > 5:
+        print(f"   ⚠️  High rework ratio ({avg_rework_ratio:.1f}%). Review processes for defects.")
+    else:
+        print(f"   ✅ Rework ratio is manageable ({avg_rework_ratio:.1f}%).")
+    
+    print("\n" + "="*60)
+
+
+# ==========================================
+# STEP 4: EXPORT RESULTS
+# ==========================================
+
+def export_results(df_kpi, output_filename='operations_kpi_results.csv'):
+    """
+    Export the data with calculated KPIs to a new CSV file.
+    
+    Args:
+        df_kpi (pd.DataFrame): Data with KPIs
+        output_filename (str): Name of output file
+    """
+    print(f"\n💾 Exporting results to {output_filename}...")
+    
+    # Save to CSV
+    df_kpi.to_csv(output_filename, index=False)
+    
+    print(f"✅ Results exported successfully!")
+    print(f"   Columns: {', '.join(df_kpi.columns.tolist())}")
+
+
+# ==========================================
+# MAIN EXECUTION
+# ==========================================
+
+def main():
+    """
+    Main function to run the entire analytics pipeline.
+    """
+    print("\n🚀 Starting Operations KPI Dashboard Analysis\n")
+    
+    try:
+        # Step 1: Load data
+        df = load_data('operations_data.csv')
+        
+        # Step 2: Calculate KPIs
+        df_kpi = calculate_kpis(df)
+        
+        # Step 3: Generate and display summary
+        generate_summary(df_kpi)
+        
+        # Step 4: Export results
+        export_results(df_kpi, 'operations_kpi_results.csv')
+        
+        print("\n✨ Analysis complete! Check 'operations_kpi_results.csv' for detailed results.\n")
+        
+    except FileNotFoundError:
+        print("❌ Error: 'operations_data.csv' not found. Please ensure the file exists.")
+    except Exception as e:
+        print(f"❌ An error occurred: {e}")
+
+
+# Run the script
+if __name__ == "__main__":
+    main()
