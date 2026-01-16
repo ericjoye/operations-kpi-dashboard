@@ -2,6 +2,22 @@
 
 A beginner-friendly Python analytics project that calculates key performance indicators (KPIs) for operations teams. This project demonstrates how to analyze operational data, calculate meaningful metrics, and generate executive summaries.
 
+## 📋 Table of Contents
+
+- [Business Problem](#-business-problem)
+- [Key Performance Indicators (KPIs)](#-key-performance-indicators-kpis)
+- [How to Run This Project](#-how-to-run-this-project)
+- [Project Structure](#-project-structure)
+- [Sample Data Structure](#-sample-data-structure)
+- [Understanding the Analysis](#-understanding-the-analysis)
+- [Learning Opportunities](#-learning-opportunities)
+- [Understanding Your Results](#-understanding-your-results)
+- [Customization Ideas](#-customization-ideas)
+- [Business Use Cases](#-business-use-cases)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Questions or Feedback?](#-questions-or-feedback)
+
 ## 🎯 Business Problem
 
 Operations teams need to track and improve their performance, but raw data alone doesn't tell the full story. This project solves that problem by:
